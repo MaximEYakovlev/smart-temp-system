@@ -1,16 +1,25 @@
 import { Injectable } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { TemperatureEntity } from './temperature.entity';
+import { Repository } from 'typeorm';
 
 @Injectable()
 export class TemperatureService {
-  private data: number[] = [];
+  constructor(
+    @InjectRepository(TemperatureEntity)
+    private readonly repo: Repository<TemperatureEntity>,
+  ) {}
 
-  save(value: number) {
-    this.data.push(value);
+  async save(value: number) {
+    const entity = this.repo.create({ value });
+    await this.repo.save(entity);
     return { status: 'ok', value };
   }
 
-  getLast() {
-    const last = this.data[this.data.length - 1];
-    return { value: last ?? null };
+  async getLast() {
+    const last = await this.repo.findOne({
+      order: { createdAt: 'DESC' },
+    });
+    return { value: last?.value ?? null };
   }
 }
