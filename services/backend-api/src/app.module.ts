@@ -12,7 +12,7 @@ import { AppService } from './app.service';
       host: 'localhost',
       port: 5432,
       username: 'postgres',
-      password: 'my_password',
+      password: 'postgres',
       database: 'smart_temp',
       entities: [TemperatureEntity],
       synchronize: true,
