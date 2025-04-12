@@ -1,0 +1,15 @@
+{
+  "name": "smart-temp-system",
+  "version": "1.0.0",
+  "description": "A modular temperature tracking system designed for smart medical or industrial environments. The system is built using a monorepo structure and includes multiple isolated services such as backend API, frontend interface, database, and more.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "socket.io": "^4.8.1"
+  }
+}
