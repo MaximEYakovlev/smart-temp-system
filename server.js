@@ -1,27 +1,24 @@
-const http = require('http');
-const socketIo = require('socket.io');
+// Creates a new WebSocket connection to the specified URL.
+const socket = new WebSocket('ws://localhost:8080');
 
-const server = http.createServer();
-const io = socketIo(server, {
-  cors: {
-    origin: '*',
-  },
+// Executes when the connection is successfully established.
+socket.addEventListener('open', event => {
+  console.log('WebSocket connection established!');
+  // Sends a message to the WebSocket server.
+  socket.send('Hello Server!');
 });
 
-io.on('connection', (socket) => {
-  console.log('A user connected');
-
-  setInterval(() => {
-    const temperature = (Math.random() * 10 + 20).toFixed(2);
-    socket.emit('temperature', { temperature });
-  }, 2000);
-
-  socket.on('disconnect', () => {
-    console.log('A user disconnected');
-  });
+// Listen for messages and executes when a message is received from the server.
+socket.addEventListener('message', event => {
+  console.log('Message from server: ', event.data);
 });
 
-const PORT = 3001;
-server.listen(PORT, () => {
-  console.log(`Server is running on http://localhost:${PORT}`);
+// Executes when the connection is closed, providing the close code and reason.
+socket.addEventListener('close', event => {
+  console.log('WebSocket connection closed:', event.code, event.reason);
+});
+
+// Executes if an error occurs during the WebSocket communication.
+socket.addEventListener('error', error => {
+  console.error('WebSocket error:', error);
 });
