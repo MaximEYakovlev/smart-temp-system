@@ -1,24 +1,34 @@
-// Creates a new WebSocket connection to the specified URL.
-const socket = new WebSocket('ws://localhost:8080');
+const WebSocket = require('ws');
 
-// Executes when the connection is successfully established.
-socket.addEventListener('open', event => {
-  console.log('WebSocket connection established!');
-  // Sends a message to the WebSocket server.
-  socket.send('Hello Server!');
-});
+// Create a WebSocket server listening on port 8080
+const wss = new WebSocket.Server({ port: 8080 });
 
-// Listen for messages and executes when a message is received from the server.
-socket.addEventListener('message', event => {
-  console.log('Message from server: ', event.data);
-});
+console.log('🚀 WebSocket server is running at ws://localhost:8080');
 
-// Executes when the connection is closed, providing the close code and reason.
-socket.addEventListener('close', event => {
-  console.log('WebSocket connection closed:', event.code, event.reason);
-});
+wss.on('connection', (ws) => {
+  console.log('✅ A client has connected');
 
-// Executes if an error occurs during the WebSocket communication.
-socket.addEventListener('error', error => {
-  console.error('WebSocket error:', error);
+  // Send an initial message to the client
+  ws.send('📡 Server has started streaming data...');
+
+  // Stream data to the client every 2 seconds
+  const intervalId = setInterval(() => {
+    const data = {
+      timestamp: new Date().toISOString(),
+      temperature: (Math.random() * 30 + 10).toFixed(2), // Simulated temperature
+    };
+
+    ws.send(JSON.stringify(data));
+  }, 2000);
+
+  // Handle client disconnection
+  ws.on('close', () => {
+    clearInterval(intervalId);
+    console.log('❌ Client disconnected, streaming stopped');
+  });
+
+  // Handle errors
+  ws.on('error', (err) => {
+    console.error('WebSocket error:', err);
+  });
 });
