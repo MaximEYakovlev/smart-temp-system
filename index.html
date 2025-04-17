@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>WebSocket Streaming</title>
+</head>
+<body>
+  <h1>🔥 Real-Time Data Stream from Server</h1>
+  <ul id="log"></ul>
+
+  <script>
+    const socket = new WebSocket('ws://localhost:8080');
+    const log = document.getElementById('log');
+
+    socket.addEventListener('open', () => {
+      console.log('✅ WebSocket connection established');
+    });
+
+    socket.addEventListener('message', event => {
+      const li = document.createElement('li');
+
+      try {
+        const data = JSON.parse(event.data);
+        li.textContent = `🌡️ ${data.timestamp} — ${data.temperature} °C`;
+      } catch {
+        li.textContent = `📩 ${event.data}`;
+      }
+
+      log.appendChild(li);
+    });
+
+    socket.addEventListener('close', () => {
+      console.log('❌ Connection closed');
+    });
+
+    socket.addEventListener('error', error => {
+      console.error('WebSocket error:', error);
+    });
+  </script>
+</body>
+</html>
