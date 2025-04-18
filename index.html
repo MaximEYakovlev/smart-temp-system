@@ -3,39 +3,71 @@
 <head>
   <meta charset="UTF-8">
   <title>WebSocket Streaming</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+    }
+    h1 {
+      color: #333;
+    }
+    #log {
+      list-style-type: none;
+      padding: 0;
+    }
+    #log li {
+      margin-bottom: 5px;
+    }
+  </style>
 </head>
 <body>
   <h1>🔥 Real-Time Data Stream from Server</h1>
   <ul id="log"></ul>
 
   <script>
-    const socket = new WebSocket('ws://localhost:8080');
     const log = document.getElementById('log');
+    let socket;
+    let reconnectInterval = 1000; // Initial reconnect interval in milliseconds
+    const maxReconnectInterval = 30000; // Maximum reconnect interval
 
-    socket.addEventListener('open', () => {
-      console.log('✅ WebSocket connection established');
-    });
+    // Function to establish WebSocket connection
+    function connect() {
+      socket = new WebSocket('ws://localhost:8080');
 
-    socket.addEventListener('message', event => {
-      const li = document.createElement('li');
+      // Event listener for successful connection
+      socket.addEventListener('open', () => {
+        console.log('✅ WebSocket connection established');
+        reconnectInterval = 1000; // Reset reconnect interval upon successful connection
+      });
 
-      try {
-        const data = JSON.parse(event.data);
-        li.textContent = `🌡️ ${data.timestamp} — ${data.temperature} °C`;
-      } catch {
-        li.textContent = `📩 ${event.data}`;
-      }
+      // Event listener for incoming messages
+      socket.addEventListener('message', event => {
+        const li = document.createElement('li');
+        try {
+          const data = JSON.parse(event.data);
+          li.textContent = `🌡️ ${data.timestamp} — ${data.temperature} °C`;
+        } catch {
+          li.textContent = `📩 ${event.data}`;
+        }
+        log.appendChild(li);
+      });
 
-      log.appendChild(li);
-    });
+      // Event listener for connection closure
+      socket.addEventListener('close', () => {
+        console.log('❌ Connection closed, attempting to reconnect...');
+        setTimeout(connect, reconnectInterval);
+        reconnectInterval = Math.min(reconnectInterval * 2, maxReconnectInterval); // Exponential backoff
+      });
 
-    socket.addEventListener('close', () => {
-      console.log('❌ Connection closed');
-    });
+      // Event listener for errors
+      socket.addEventListener('error', error => {
+        console.error('WebSocket error:', error);
+        socket.close(); // Close the socket to trigger the reconnect logic
+      });
+    }
 
-    socket.addEventListener('error', error => {
-      console.error('WebSocket error:', error);
-    });
+    // Initiate the WebSocket connection
+    connect();
   </script>
 </body>
 </html>
