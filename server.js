@@ -1,20 +1,25 @@
-const express = require('express');
-const expressWs = require('express-ws');
+const Fastify = require('fastify');
+const websocketPlugin = require('@fastify/websocket');
 
-const app = express();
-expressWs(app);
+const fastify = Fastify();
 
-app.ws('/ws', (ws, req) => {
-  ws.on('message', (msg) => {
-    console.log(`Received message: ${msg}`);
-    ws.send(`Echo: ${msg}`);
+fastify.register(websocketPlugin);
+
+fastify.get('/ws', { websocket: true }, (connection, req) => {
+  connection.socket.on('message', (message) => {
+    console.log(`Received message: ${message}`);
+    connection.socket.send(`Echo: ${message}`);
   });
 
-  ws.on('close', () => {
+  connection.socket.on('close', () => {
     console.log('Client disconnected');
   });
 });
 
-app.listen(3000, () => {
+fastify.listen({ port: 3000 }, (err) => {
+  if (err) {
+    console.error(err);
+    process.exit(1);
+  }
   console.log('Server is running on http://localhost:3000');
 });
